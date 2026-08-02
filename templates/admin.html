@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Secured Area</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Exact same CSS as before + KPI Card styling */
+        :root { --bg: #090d16; --panel: #111827; --panel-border: rgba(255, 255, 255, 0.08); --accent: #2563eb; --accent-glow: rgba(37, 99, 235, 0.3); --text: #f9fafb; --muted: #9ca3af; --success: #10b981; --danger: #ef4444; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { background-color: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 70%); }
+        header { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid var(--panel-border); padding: 0 40px; height: 75px; display: flex; align-items: center; justify-content: space-between; }
+        .brand { font-size: 17px; font-weight: 600; display: flex; align-items: center; gap: 12px; }
+        .brand-icon { background: rgba(37, 99, 235, 0.15); padding: 8px; border-radius: 10px; color: #60a5fa; }
+        .nav-menu { display: flex; gap: 10px; align-items: center; }
+        .nav-menu a { color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; padding: 8px 16px; border-radius: 8px; }
+        .nav-menu a.active { color: #ffffff; background: var(--accent); }
+        .btn-logout { background: rgba(239, 68, 68, 0.1); color: #ef4444; padding: 8px 16px; border-radius: 8px; text-decoration: none; font-size: 14px; font-weight: 600; margin-left: 20px; transition: 0.2s; }
+        .btn-logout:hover { background: #ef4444; color: white; }
+
+        .main-container { padding: 40px; display: flex; flex-direction: column; align-items: center; }
+        .dashboard-wrapper { width: 100%; max-width: 1100px; }
+        
+        /* Analytics KPI Cards */
+        .kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .kpi-card { background: var(--panel); border: 1px solid var(--panel-border); border-radius: 16px; padding: 25px; display: flex; align-items: center; gap: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .kpi-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; }
+        .kpi-card:nth-child(1) .kpi-icon { background: rgba(59, 130, 246, 0.15); color: #60a5fa; }
+        .kpi-card:nth-child(2) .kpi-icon { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .kpi-card:nth-child(3) .kpi-icon { background: rgba(139, 92, 246, 0.15); color: #a78bfa; }
+        .kpi-info h4 { color: var(--muted); font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; }
+        .kpi-info h2 { font-size: 28px; font-weight: 700; color: white; }
+
+        .dashboard-card { background: var(--panel); padding: 30px; border-radius: 20px; border: 1px solid var(--panel-border); box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5); }
+        .tab-controls { display: flex; gap: 15px; margin-bottom: 30px; border-bottom: 1px solid var(--panel-border); padding-bottom: 15px; }
+        .tab-btn { background: transparent; border: none; color: var(--muted); font-size: 16px; font-weight: 600; cursor: pointer; padding: 10px 20px; border-radius: 8px; transition: all 0.2s; }
+        .tab-btn.active { background: rgba(255,255,255,0.05); color: var(--text); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .dashboard-header h2 { font-weight: 600; font-size: 20px; }
+        
+        .table-container { overflow-x: auto; border-radius: 12px; border: 1px solid var(--panel-border); }
+        table { width: 100%; border-collapse: collapse; text-align: left; background: #030712; }
+        th { background: rgba(255,255,255,0.03); color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; padding: 16px; border-bottom: 1px solid var(--panel-border); }
+        td { padding: 16px; border-bottom: 1px solid var(--panel-border); font-size: 14px; font-weight: 500; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        .status-badge { background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 6px 12px; border-radius: 50px; font-size: 12px; font-weight: 700; }
+        .action-btn { background: rgba(255,255,255,0.1); border: none; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; cursor: pointer; margin-right: 5px; }
+        .action-btn.edit { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .action-btn.delete { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+        .btn-export { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.3); padding: 10px 18px; font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-card { background: var(--panel); padding: 30px; border-radius: 16px; width: 400px; border: 1px solid var(--panel-border); }
+        .modal-card h3 { margin-bottom: 20px; }
+        .form-control { width: 100%; background: #030712; border: 1px solid var(--panel-border); color: white; padding: 12px; border-radius: 8px; margin-bottom: 15px; }
+        .btn-primary { width: 100%; background: var(--accent); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px; }
+        .btn-cancel { width: 100%; background: transparent; color: var(--muted); border: 1px solid var(--panel-border); padding: 12px; border-radius: 8px; cursor: pointer; font-weight: 600; margin-top: 10px; }
+        #biometricImg { width: 150px; height: 150px; border-radius: 10px; border: 2px solid var(--accent); object-fit: cover; display: block; margin: 0 auto 20px auto; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="brand-icon">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/></svg>
+            </div>
+            Admin Portal (Secured)
+        </div>
+        <div class="nav-menu">
+            <a href="/">Scanner</a>
+            <a href="/register">Enrollment</a>
+            <a href="/admin" class="active">Database</a>
+            <a href="/logout" class="btn-logout">System Logout</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="dashboard-wrapper">
+            
+            <!-- NEW: ANALYTICS KPI DASHBOARD -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <div class="kpi-info">
+                        <h4>Total Registered</h4>
+                        <h2>{{ total_students }}</h2>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="kpi-info">
+                        <h4>Present Today</h4>
+                        <h2>{{ present_today }}</h2>
+                    </div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-icon">
+                        <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <div class="kpi-info">
+                        <h4>AI Engine Status</h4>
+                        <h2 style="color: #34d399; font-size: 20px; margin-top:5px;">Online & Active</h2>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="tab-controls">
+                    <button class="tab-btn active" onclick="switchTab('attendance')">Live Attendance Logs</button>
+                    <button class="tab-btn" onclick="switchTab('database')">Student Profiles (CRUD)</button>
+                </div>
+
+                <div id="attendance" class="tab-content active">
+                    <div class="dashboard-header">
+                        <h2>Daily Attendance Records</h2>
+                        <button class="btn-export" onclick="exportTableToCSV('attendance_logs.csv')">Export CSV</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Date</th><th>Time</th><th>Student Name</th><th>Matric No.</th><th>Status</th></tr></thead>
+                            <tbody>
+                                {% for row in records %}
+                                <tr><td>{{ row['date'] }}</td><td>{{ row['time'] }}</td><td>{{ row['name'] }}</td><td style="color: #60a5fa;">{{ row['matric_no'] }}</td><td><span class="status-badge">{{ row['status'] }}</span></td></tr>
+                                {% else %}
+                                <tr><td colspan="5" style="text-align:center; padding: 20px;">No attendance logged today.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="database" class="tab-content">
+                    <div class="dashboard-header">
+                        <h2>Master Identity Database</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>ID</th><th>Student Name</th><th>Matric No.</th><th>Management Actions</th></tr></thead>
+                            <tbody>
+                                {% for student in students %}
+                                <tr>
+                                    <td>#{{ student['student_id'] }}</td><td>{{ student['name'] }}</td><td style="color: #60a5fa;">{{ student['matric_no'] }}</td>
+                                    <td>
+                                        <button class="action-btn" onclick="viewPicture('{{ student['student_id'] }}', '{{ student['name'] }}')">View Image</button>
+                                        <button class="action-btn edit" onclick="openEditModal('{{ student['student_id'] }}', '{{ student['name'] }}', '{{ student['matric_no'] }}')">Edit</button>
+                                        <button class="action-btn delete" onclick="deleteStudent('{{ student['student_id'] }}')">Delete</button>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr><td colspan="4" style="text-align:center; padding: 20px;">No students registered.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals (Same as before) -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-card">
+            <h3>Update Student Details</h3>
+            <input type="hidden" id="edit_id">
+            <label style="font-size: 12px; color: var(--muted); margin-bottom: 5px; display: block;">Full Name</label>
+            <input type="text" id="edit_name" class="form-control">
+            <label style="font-size: 12px; color: var(--muted); margin-bottom: 5px; display: block;">Matriculation Number</label>
+            <input type="text" id="edit_matric" class="form-control">
+            <button class="btn-primary" onclick="saveStudent()">Commit Changes</button>
+            <button class="btn-cancel" onclick="closeModal('editModal')">Cancel</button>
+        </div>
+    </div>
+    <div class="modal-overlay" id="pictureModal">
+        <div class="modal-card" style="text-align: center;">
+            <h3 id="picNameTitle">Biometric Sample</h3>
+            <img id="biometricImg" src="" alt="Biometric Face">
+            <button class="btn-primary" onclick="closeModal('pictureModal')">Close View</button>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            event.target.classList.add('active');
+        }
+        function closeModal(modalId) { document.getElementById(modalId).style.display = 'none'; }
+        function viewPicture(id, name) { document.getElementById('picNameTitle').innerText = name; document.getElementById('biometricImg').src = `/dataset/user.${id}.1.jpg`; document.getElementById('pictureModal').style.display = 'flex'; }
+        function openEditModal(id, name, matric) { document.getElementById('edit_id').value = id; document.getElementById('edit_name').value = name; document.getElementById('edit_matric').value = matric; document.getElementById('editModal').style.display = 'flex'; }
+        
+        function saveStudent() {
+            const id = document.getElementById('edit_id').value;
+            const name = document.getElementById('edit_name').value;
+            const matric = document.getElementById('edit_matric').value;
+            fetch('/api/update_student', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ student_id: id, name: name, matric: matric }) })
+            .then(res => res.json()).then(data => { if(data.status === 'success') location.reload(); else alert(data.message); });
+        }
+        function deleteStudent(id) {
+            if(confirm("AUTHORIZATION REQUIRED: Permanently delete student and wipe neural biometric data?")) {
+                fetch(`/api/delete_student/${id}`, { method: 'POST' }).then(res => res.json()).then(data => { if(data.status === 'success') location.reload(); });
+            }
+        }
+        function exportTableToCSV(filename) {
+            var csv = []; var rows = document.querySelectorAll("#attendance table tr");
+            for (var i = 0; i < rows.length; i++) {
+                var row = [], cols = rows[i].querySelectorAll("td, th");
+                for (var j = 0; j < cols.length; j++) row.push('"' + cols[j].innerText + '"');
+                csv.push(row.join(","));
+            }
+            var csvFile = new Blob([csv.join("\n")], {type: "text/csv"});
+            var link = document.createElement("a"); link.download = filename; link.href = window.URL.createObjectURL(csvFile);
+            link.style.display = "none"; document.body.appendChild(link); link.click();
+        }
+    </script>
+</body>
+</html>

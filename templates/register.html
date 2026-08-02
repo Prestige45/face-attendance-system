@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance | Enrollment Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg: #090d16; 
+            --panel: #111827; 
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --accent: #2563eb; 
+            --accent-glow: rgba(37, 99, 235, 0.3);
+            --text: #f9fafb; 
+            --muted: #9ca3af; 
+            --success: #10b981;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', sans-serif; }
+        body { 
+            background-color: var(--bg); 
+            color: var(--text); 
+            min-height: 100vh; 
+            display: flex; 
+            flex-direction: column;
+            background-image: radial-gradient(circle at 50% 0%, #1e1b4b 0%, var(--bg) 70%);
+        }
+        
+        /* Enterprise Header */
+        header { 
+            background: rgba(17, 24, 39, 0.8); 
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--panel-border); 
+            padding: 0 40px; 
+            height: 75px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .brand { font-size: 17px; font-weight: 600; letter-spacing: 0.5px; color: var(--text); display: flex; align-items: center; gap: 12px; }
+        .brand-icon { background: rgba(37, 99, 235, 0.15); padding: 8px; border-radius: 10px; color: #60a5fa; display: flex; }
+        
+        .nav-menu { display: flex; gap: 10px; }
+        .nav-menu a { 
+            color: var(--muted); text-decoration: none; font-size: 14px; font-weight: 500; 
+            padding: 8px 16px; border-radius: 8px; transition: all 0.2s ease;
+        }
+        .nav-menu a:hover { color: var(--text); background: rgba(255, 255, 255, 0.03); }
+        .nav-menu a.active { color: #ffffff; background: var(--accent); box-shadow: 0 4px 12px var(--accent-glow); }
+
+        /* Main Content Layout */
+        .main-container { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .terminal-card { 
+            background: var(--panel); 
+            width: 100%; 
+            max-width: 500px; 
+            padding: 40px; 
+            border-radius: 20px; 
+            border: 1px solid var(--panel-border); 
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(20px);
+        }
+        
+        .header-text { margin-bottom: 25px; }
+        .header-text h2 { font-weight: 600; font-size: 22px; margin-bottom: 8px; letter-spacing: -0.3px; }
+        .header-text p { color: var(--muted); font-size: 14px; }
+
+        /* Form Controls */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.8px; }
+        .form-control { 
+            width: 100%; 
+            background: #030712; 
+            border: 1px solid var(--panel-border); 
+            color: var(--text);
+            padding: 14px 16px; 
+            border-radius: 10px; 
+            font-size: 14px; 
+            transition: all 0.2s ease;
+        }
+        .form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+        /* Actions */
+        .btn-primary {
+            width: 100%; 
+            background: linear-gradient(135deg, #2563eb, #1d4ed8); 
+            color: white; 
+            border: none; 
+            padding: 15px;
+            font-size: 15px; 
+            font-weight: 600; 
+            border-radius: 12px; 
+            cursor: pointer; 
+            transition: all 0.2s ease; 
+            margin-top: 10px;
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 16px var(--accent-glow); background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+        /* Video Frame Styling */
+        .video-container {
+            width: 100%; 
+            aspect-ratio: 4/3; 
+            background: #030712; 
+            border-radius: 14px; 
+            border: 1px solid var(--panel-border); 
+            display: none; 
+            overflow: hidden; 
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+        }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
+        .status-bar { 
+            margin-top: 20px; 
+            padding: 14px 18px; 
+            border-radius: 10px; 
+            font-size: 13px; 
+            font-weight: 600;
+            text-align: center; 
+            background: rgba(255, 255, 255, 0.02); 
+            border: 1px solid var(--panel-border); 
+            display: none;
+            letter-spacing: 0.3px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="brand">
+            <div class="brand-icon">
+                <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+            </div>
+            Student Biometric System
+        </div>
+        <div class="nav-menu">
+            <a href="/">Scanner Terminal</a>
+            <a href="/register" class="active">Student Enrollment</a>
+            <a href="/admin">Attendance Logs</a>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div class="terminal-card">
+            <div class="header-text">
+                <h2>New Student Enrollment</h2>
+                <p>Register student credentials and facial biometric profiles.</p>
+            </div>
+            
+            <div id="formSection">
+                <div class="form-group">
+                    <label>Student Full Name</label>
+                    <input type="text" id="name" class="form-control" placeholder="e.g. Yahaya Muhammad" required>
+                </div>
+                <div class="form-group">
+                    <label>Matriculation Number</label>
+                    <input type="text" id="matric" class="form-control" placeholder="e.g. 202X/X/XXXX" required>
+                </div>
+                <button class="btn-primary" onclick="startRegistration()">Commence Biometric Capture</button>
+            </div>
+
+            <div class="video-container" id="videoContainer">
+                <video id="videoElement" autoplay playsinline></video>
+            </div>
+            <canvas id="canvas" style="display:none;"></canvas>
+            
+            <div id="statusText" class="status-bar"></div>
+            <button id="homeBtn" class="btn-primary" style="display:none; background: linear-gradient(135deg, #10b981, #059669);" onclick="window.location.href='/'">Return to Scanner Terminal</button>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('videoElement');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusText = document.getElementById('statusText');
+        const videoContainer = document.getElementById('videoContainer');
+        let currentStudentId = null;
+        let captureCount = 0;
+
+        function startRegistration() {
+            const name = document.getElementById('name').value;
+            const matric = document.getElementById('matric').value;
+            
+            if (!name || !matric) { alert("Data Validation Error: All fields are required."); return; }
+
+            fetch('/api/init_student', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: name, matric: matric })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "error") {
+                    alert(data.message);
+                } else {
+                    currentStudentId = data.student_id;
+                    document.getElementById('formSection').style.display = 'none';
+                    videoContainer.style.display = 'block';
+                    statusText.style.display = 'block';
+                    startCamera();
+                }
+            });
+        }
+
+        function startCamera() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(function(stream) {
+                video.srcObject = stream;
+                statusText.innerText = "Extracting Facial Landmarks...";
+                statusText.style.color = "#f59e0b";
+                
+                const captureInterval = setInterval(() => {
+                    if (captureCount >= 30) {
+                        clearInterval(captureInterval);
+                        trainAI();
+                        return;
+                    }
+                    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+                    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    fetch('/api/save_frame', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ student_id: currentStudentId, count: captureCount + 1, image: canvas.toDataURL('image/jpeg') })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        // --- HANDLING DUPLICATE FACES ---
+                        if (data.status === "duplicate") {
+                            clearInterval(captureInterval); 
+                            video.srcObject.getTracks().forEach(track => track.stop()); 
+                            
+                            statusText.innerText = "SECURITY ALERT: Biometric Fraud Detected";
+                            statusText.style.color = "#ef4444"; 
+                            
+                            alert("BIOMETRIC CONFLICT: This face is already registered in the database. Registration aborted.");
+                            
+                            // Reset the form so they can try again
+                            document.getElementById('formSection').style.display = 'block';
+                            videoContainer.style.display = 'none';
+                            captureCount = 0;
+                        } 
+                        // --- NORMAL FACE CAPTURE ---
+                        else if (data.face_found) {
+                            captureCount++;
+                            statusText.innerText = `Biometric Sample Acquisition: ${Math.round((captureCount/30)*100)}%`;
+                        }
+                    });
+                }, 500); 
+            })
+            .catch(err => { statusText.innerText = "Error: Camera Hardware Blocked"; statusText.style.color = "#ef4444"; });
+        }
+
+        function trainAI() {
+            statusText.innerText = "Compiling Neural Classification Model...";
+            statusText.style.color = "#3b82f6";
+            
+            fetch('/api/train', { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                statusText.innerText = "Student Enrollment & Training Completed Successfully!";
+                statusText.style.color = "#10b981";
+                document.getElementById('homeBtn').style.display = 'block';
+                video.srcObject.getTracks().forEach(track => track.stop());
+            });
+        }
+    </script>
+</body>
+</html>
