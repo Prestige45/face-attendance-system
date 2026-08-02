@@ -1,4 +1,4 @@
 Flask
 gunicorn
-opencv-python-headless==4.5.5.64
+opencv-contrib-python-headless==4.5.5.64
 numpy<2.0.0
